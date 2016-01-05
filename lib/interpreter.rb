@@ -6,34 +6,82 @@ class Interpreter
     @text = text
     @pos = 0
     @current_token = nil
+    @current_char = @text[@pos]
   end
 
   def error
     raise 'Error parsing input'
   end
 
+  def advance
+    @pos += 1
+
+    if @pos > @text.length - 1
+      @current_char = nil
+    else
+      @current_char = @text[@pos]
+    end
+  end
+
+  def is_space(string)
+    !string.nil? && string.strip.length == 0
+  end
+
+  def is_digit(string)
+    (string =~ /\d/) == 0 ? true : false
+  end
+
+  def skip_whitespace
+    while is_space(@current_char)
+      advance
+    end
+  end
+
+  def integer
+    result = ''
+    while is_digit(@current_char)
+      result += @current_char
+      advance
+    end
+    return result.to_i
+  end
+
   def get_next_token
-    text = @text
 
-    if @pos > text.length - 1
-      return Token.new(:eof, nil)
+    return Token.new(:eof, nil) if @current_char.nil?
+
+    result = nil
+
+    while !@current_char.nil? do
+
+      if is_space(@current_char)
+        skip_whitespace
+        next
+      end
+
+      if is_digit(@current_char)
+        result = Token.new(:integer, integer)
+        break
+      end
+
+      if @current_char == '+'
+        advance
+        result = Token.new(:plus, '+')
+        break
+      end
+
+      if @current_char == '-'
+        advance
+        result = Token.new(:minus, '-')
+        break
+      end
+
+      error
+
     end
 
-    current_char = @text[@pos]
+    return result
 
-    if current_char =~/[0-9]/
-        token = Token.new(:integer, current_char.to_i)
-        @pos += 1
-        return token
-    end
-
-    if current_char == '+'
-        token = Token.new(:plus, current_char)
-        @pos += 1
-        return token
-    end
-
-    error
     #if current_char =~/[A-Za-z]/
     #    token = Token.new('INTEGER', current_char.to_i)
     #    @pos += 1
@@ -42,7 +90,6 @@ class Interpreter
   end
 
   def eat(token_type)
-    token = @current_token
 
     if @current_token.type == token_type
       @current_token = get_next_token
@@ -58,12 +105,22 @@ class Interpreter
     eat(:integer)
 
     op = @current_token
-    eat(:plus)
+    if op.type == :plus
+      eat(:plus)
+    else
+      eat(:minus)
+    end
 
     right = @current_token
     eat(:integer)
 
-    return left.value + right.value
+    if op.type == :plus
+      result = left.value + right.value
+    else
+      result = left.value - right.value
+    end
+
+    result
   end
 
 end
@@ -84,4 +141,4 @@ def run
   end
 end
 
-#run
+run
