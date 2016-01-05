@@ -1,4 +1,4 @@
-require_relative 'calc1.rb'
+require_relative 'token.rb'
 
 class Interpreter
 

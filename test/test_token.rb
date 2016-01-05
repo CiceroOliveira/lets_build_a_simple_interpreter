@@ -1,5 +1,5 @@
 require 'test/unit'
-require_relative '../lib/calc1.rb'
+require_relative '../lib/token.rb'
 require_relative '../lib/interpreter.rb'
 
 class TestCalculator < Test::Unit::TestCase
