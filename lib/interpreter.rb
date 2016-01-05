@@ -1,134 +1,80 @@
 require_relative 'token.rb'
+require_relative 'lexer.rb'
+require_relative 'bin_op.rb'
+require_relative 'num.rb'
 
 class Interpreter
 
-  def initialize(text)
-    @text = text
-    @pos = 0
-    @current_token = nil
-    @current_char = @text[@pos]
+  def initialize(lexer)
+    @lexer = lexer
+    @current_token = @lexer.get_next_token
   end
 
-  #
-  # Lexer code
-  #
   def error
     raise 'Invalid syntax'
   end
 
-  def advance
-    @pos += 1
-
-    if @pos > @text.length - 1
-      @current_char = nil
-    else
-      @current_char = @text[@pos]
-    end
-  end
-
-  def is_space(string)
-    !string.nil? && string.strip.length == 0
-  end
-
-  def is_digit(string)
-    (string =~ /\d/) == 0 ? true : false
-  end
-
-  def skip_whitespace
-    while is_space(@current_char)
-      advance
-    end
-  end
-
-  def integer
-    result = ''
-    while is_digit(@current_char)
-      result += @current_char
-      advance
-    end
-    return result.to_i
-  end
-
-  def get_next_token
-
-    return Token.new(:eof, nil) if @current_char.nil?
-
-    result = nil
-
-    while !@current_char.nil? do
-
-      if is_space(@current_char)
-        skip_whitespace
-        next
-      end
-
-      if is_digit(@current_char)
-        result = Token.new(:integer, integer)
-        break
-      end
-
-      if @current_char == '+'
-        advance
-        result = Token.new(:plus, '+')
-        break
-      end
-
-      if @current_char == '-'
-        advance
-        result = Token.new(:minus, '-')
-        break
-      end
-
-      error
-
-    end
-
-    return result
-
-    #if current_char =~/[A-Za-z]/
-    #    token = Token.new('INTEGER', current_char.to_i)
-    #    @pos += 1
-    #    return token
-    #end
-  end
-
-  #
-  # Parser/Interpreter code
-  #
   def eat(token_type)
 
     if @current_token.type == token_type
-      @current_token = get_next_token
+      @current_token = @lexer.get_next_token
     else
       error
     end
   end
 
-  def term
+  def factor
+
     token = @current_token
-    eat(:integer)
-    return token.value
+
+    if token.type == :integer
+      eat(:integer)
+      return Num.new(token)
+    elsif token.type == :lparen
+      eat(:lparen)
+      node = expr
+      eat(:rparen)
+      return node
+    end
+
+  end
+
+  def term
+    node = factor
+
+    while [:div, :mul].include?(@current_token.type)
+      token = @current_token
+
+      if token.type == :mul
+        eat(:mul)
+      elsif token.type == :div
+        eat(:div)
+      end
+      node = BinOp(node, token, factor)
+    end
+
+    return node
   end
 
   def expr
-    @current_token = get_next_token
-
-    result = term
+    node = term
 
     while [:plus, :minus].include?(@current_token.type)
       token = @current_token
 
       if token.type == :plus
         eat(:plus)
-        result = result + term
       elsif token.type == :minus
         eat(:minus)
-        result = result - term
       end
 
     end
 
-    result
+    node = BinOp(node, token, term)
+  end
+
+  def parse
+    return expr
   end
 
 end
@@ -142,11 +88,12 @@ def run
     when "exit"
       break
     else
-      interpreter = Interpreter.new(user_input)
+      lexer = Lexer.new(user_input)
+      interpreter = Interpreter.new(lexer)
       result = interpreter.expr
       puts result
     end
   end
 end
 
-run
+#run

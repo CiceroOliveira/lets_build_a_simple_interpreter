@@ -3,59 +3,64 @@ require_relative '../lib/interpreter.rb'
 
 class TestInterpreter < Test::Unit::TestCase
 
-  def test_eof_found
-    interpreter = Interpreter.new('');
-    assert_equal 'Token(eof, )', interpreter.get_next_token.to_s
+  def test_calculator_multiplies
+    lexer = Lexer.new('2*3')
+    interpreter = Interpreter.new(lexer);
+    assert_equal 6, interpreter.expr()
   end
 
-  def test_recognizes_digit
-    interpreter = Interpreter.new('1');
-    assert_equal 'Token(integer, 1)', interpreter.get_next_token.to_s
+  def test_calculator_divides
+    lexer = Lexer.new('8/2')
+    interpreter = Interpreter.new(lexer);
+    assert_equal 4, interpreter.expr()
   end
 
-  def test_recognizes_plus_sign
-    interpreter = Interpreter.new('+');
-    assert_equal 'Token(plus, +)', interpreter.get_next_token.to_s
-  end
-
-  def test_recognizes_minus_sign
-    interpreter = Interpreter.new('-');
-    assert_equal 'Token(minus, -)', interpreter.get_next_token.to_s
-  end
-
-  def test_recognizes_two_digit
-    interpreter = Interpreter.new('12');
-    assert_equal 'Token(integer, 12)', interpreter.get_next_token.to_s
+  def test_calculator_divides_returns_integer
+    lexer = Lexer.new('9/2')
+    interpreter = Interpreter.new(lexer);
+    assert_equal 4, interpreter.expr()
   end
 
   def test_calculator_adds
-    interpreter = Interpreter.new('2+3');
+    lexer = Lexer.new('2+3')
+    interpreter = Interpreter.new(lexer);
     assert_equal 5, interpreter.expr()
   end
 
   def test_calculator_subtracts_handles_negative_results
-    interpreter = Interpreter.new('2-3');
-    assert_equal -1, interpreter.expr()
-  end
-
-  def test_calculator_subtracts_handles_negative_results_
-    interpreter = Interpreter.new('2-3');
+    lexer = Lexer.new('2-3')
+    interpreter = Interpreter.new(lexer);
     assert_equal -1, interpreter.expr()
   end
 
   def test_calculator_subtracts
-    interpreter = Interpreter.new('5-3');
+    lexer = Lexer.new('5-3')
+    interpreter = Interpreter.new(lexer);
     assert_equal 2, interpreter.expr()
   end
 
   def test_calculator_many_terms
-    interpreter = Interpreter.new('5-3+2');
-    assert_equal 4, interpreter.expr()
+    lexer = Lexer.new('13-3-2');
+    interpreter = Interpreter.new(lexer);
+    assert_equal 8, interpreter.expr()
   end
 
   def test_calculator_many_terms_with_whitespace
-    interpreter = Interpreter.new('5- 3 +2');
+    lexer = Lexer.new('5- 3 +2')
+    interpreter = Interpreter.new(lexer);
     assert_equal 4, interpreter.expr()
+  end
+
+  def test_calculator_multiple_operations
+    lexer = Lexer.new('2 + 7 * 4')
+    interpreter = Interpreter.new(lexer);
+    assert_equal 30, interpreter.expr()
+  end
+
+  def test_calculator_multiple_operations_with_parentheses
+    lexer = Lexer.new('7 + 3 * (10 / (12 / (3 + 1) - 1))')
+    interpreter = Interpreter.new(lexer);
+    assert_equal 22, interpreter.expr()
   end
 
 end
