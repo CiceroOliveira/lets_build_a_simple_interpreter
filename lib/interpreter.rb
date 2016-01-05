@@ -9,8 +9,11 @@ class Interpreter
     @current_char = @text[@pos]
   end
 
+  #
+  # Lexer code
+  #
   def error
-    raise 'Error parsing input'
+    raise 'Invalid syntax'
   end
 
   def advance
@@ -89,6 +92,9 @@ class Interpreter
     #end
   end
 
+  #
+  # Parser/Interpreter code
+  #
   def eat(token_type)
 
     if @current_token.type == token_type
@@ -98,26 +104,28 @@ class Interpreter
     end
   end
 
+  def term
+    token = @current_token
+    eat(:integer)
+    return token.value
+  end
+
   def expr
     @current_token = get_next_token
 
-    left = @current_token
-    eat(:integer)
+    result = term
 
-    op = @current_token
-    if op.type == :plus
-      eat(:plus)
-    else
-      eat(:minus)
-    end
+    while [:plus, :minus].include?(@current_token.type)
+      token = @current_token
 
-    right = @current_token
-    eat(:integer)
+      if token.type == :plus
+        eat(:plus)
+        result = result + term
+      elsif token.type == :minus
+        eat(:minus)
+        result = result - term
+      end
 
-    if op.type == :plus
-      result = left.value + right.value
-    else
-      result = left.value - right.value
     end
 
     result
