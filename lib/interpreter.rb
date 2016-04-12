@@ -9,13 +9,13 @@ class Interpreter < NodeVisitor
   end
 
   def visit_BinOp(node)
-    if node.op.type == :PLUS
+    if node.op.type == :plus
       return visit(node.left) + visit(node.right)
-    elsif node.op.type == :MINUS
+    elsif node.op.type == :minus
       return visit(node.left) - visit(node.right)
-    elsif node.op.type == :MUL
+    elsif node.op.type == :mul
       return visit(node.left) * visit(node.right)
-    elsif node.op.type == :DIV
+    elsif node.op.type == :div
       return visit(node.left) / visit(node.right)
     end
   end
@@ -25,7 +25,7 @@ class Interpreter < NodeVisitor
   end
 
   def interpret
-    tree = @parser.parse()
+    tree = @parser.parse
     return visit(tree)
   end
 end

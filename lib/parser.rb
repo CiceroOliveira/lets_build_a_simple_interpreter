@@ -25,7 +25,6 @@ class Parser
   end
 
   def factor
-
     token = @current_token
 
     if token.type == :integer
@@ -51,10 +50,12 @@ class Parser
       elsif token.type == :div
         eat(:div)
       end
+
       node = BinOp.new(node, token, factor)
     end
 
     return node
+
   end
 
   def expr
@@ -69,9 +70,12 @@ class Parser
         eat(:minus)
       end
 
+      node = BinOp.new(node, token, term)
+
     end
 
-    node = BinOp.new(node, token, term)
+    return node
+
   end
 
   def parse
@@ -92,7 +96,6 @@ def run
       lexer = Lexer.new(user_input)
       interpreter = Interpreter.new(lexer)
       result = interpreter.expr
-      puts result
     end
   end
 end

@@ -1,0 +1,7 @@
+require 'test/unit'
+require_relative 'tc_bin_op'
+require_relative 'tc_calculator'
+require_relative 'tc_interpreter'
+require_relative 'tc_lexer'
+require_relative 'tc_parser'
+require_relative 'tc_token'

@@ -7,7 +7,6 @@ class Calculator
   def initialize(equation)
     lexer = Lexer.new(equation)
     parser = Parser.new(lexer)
-    puts parser
     @interpreter = Interpreter.new(parser)
   end
 
