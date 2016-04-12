@@ -8,7 +8,7 @@ class Lexer
   end
 
   def error
-    raise 'Invalid syntax'
+    raise 'Invalid character'
   end
 
   def advance
